@@ -1,0 +1,1 @@
+export const DUMMUY_ACTION = 'DUMMUY_ACTION';

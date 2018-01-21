@@ -1,8 +1,10 @@
 import { Navigation } from 'react-native-navigation';
+// import { Icon } from 'native-base';
 
 const startTabs = () => {
+
 	Navigation.startTabBasedApp({
-		tabs: [
+	tabs: [
 			{
 				screen: "petLuvs.FirstScreen",
 				label: 'FirstScreen',
@@ -11,7 +13,7 @@ const startTabs = () => {
 			{
 				screen: "petLuvs.SecondScreen",
 				label: 'SecondScreen',
-				title: 'SecondScreen'
+				title: 'SecondScreen',
 			},
 			{
 				screen: "petLuvs.ThirdScreen",
