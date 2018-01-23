@@ -19,6 +19,6 @@ Navigation.registerComponent("petLuvs.ThirdScreen", () => ThirdScreen, store, Pr
 Navigation.startSingleScreenApp({
   screen: {
     screen: "petLuvs.AuthScreen",
-    title: "Login"
+    title: "Authenticate"
   }
 })

@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, ActivityIndicator } from 'react-native';
 import { FBLogin, FBLoginManager } from 'react-native-facebook-login';
 import InstagramLogin from 'react-native-instagram-login';
 import { Field, reduxForm } from 'redux-form';
 import { Container, Content, Form, Item, Input, Label, Button, Text, Icon } from 'native-base';
 
-import startMainTabs from '../MainTabs/startMainTabs';
-import validateInput from '../../validation/validation';
+// import startMainTabs from '../MainTabs/startMainTabs';
 import { tryAuth } from '../../store/actions/index';
 import validate from '../../validation/validation';
 
@@ -19,16 +18,27 @@ class AuthScreen extends Component {
 
 	state = {
 		errors: {},
-		isLoading: false
+		authMode: "login"
 	}
 
-	loginHandler = (values) => {
-		// startMainTabs();
-		console.log(values);
+	authHandler = (values) => {
+		const authData = {
+			email: values.email,
+			password: values.password
+		}
+		this.props.onTryAuth(authData, this.state.authMode);
+	}
+
+	switchAuthModeHandler = () => {
+		this.setState(prevState => {
+			return {
+				authMode: prevState.authMode === "login" ? "signup" : "login"
+			}
+		})
 	}
 
 	renderInput = props => {
-		const { input,onChange, onBlur, onFocus, value, label, meta: { touched, error, warning} } = props;
+		const { keyboardType, autoCorrect, secureTextEntry,input,onChange, onBlur, onFocus, value, label, meta: { touched, error, warning} } = props;
 		let hasError = false;
 		if(error !== undefined) {
 			hasError = true;
@@ -41,46 +51,73 @@ class AuthScreen extends Component {
 					onBlur={onBlur}
 					onFocus={onFocus}
 					value={value}
-					{...input} />
+					{...input} 
+					autoCapitalize="none"
+					autoCorrect
+					keyboardType={keyboardType}
+					secureTextEntry={secureTextEntry}
+					/>
 				{hasError ? <Text>{error}</Text> : <Text />}
 			</Item>
 		)
 	}
 	render() {
-		console.log(this.props);
 		const { handleSubmit, invalid } = this.props;
+
+		let submitButton = (
+			<Button
+				disabled={invalid}
+				onPress={handleSubmit(this.authHandler)} 
+				full style={{ margin: 5}}>
+				<Text>Sign In</Text>
+			</Button>
+		)
+		if (this.props.isLoading) {
+			submitButton = <ActivityIndicator />
+		}
 		return (
 			<Container style={styles.container}>
-				<Content padder>
+				<Button onPress={this.switchAuthModeHandler} full>
+					<Text>Switch to {this.state.authMode === 'login' ? "Signup" : 'login'}</Text>
+				</Button>
+
+				<KeyboardAvoidingView behavior="padding">
+					<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 					<Form style={styles.formStyle} >
 						<Field 
 							name="email"
 							label="Email"
 							type="email"
-							component={this.renderInput}/>						
+							component={this.renderInput}
+							keyboardType="email-address"
+							secureTextEntry={false}
+							autoCorrect={false}/>						
 						<Field 
 							name="password"
 							label="Password"
 							type="password"
-							component={this.renderInput}/>
-						<Field 
+							component={this.renderInput}
+							secureTextEntry={true}
+							autoCorrect={false}/>
+						{ this.state.authMode === 'signup'
+						? <Field 
 							name="confirmPassword"
 							label="Password Confirmation"
 							type="password"
-							component={this.renderInput}/>
+							component={this.renderInput}
+							secureTextEntry={true}
+							autoCorrect={false}/>
+						: null
+						}
 					</Form>
-					<Button
-						disabled={invalid}
-						onPress={handleSubmit(this.loginHandler)} 
-						full style={{ margin: 5}}>
-						<Text>Sign In</Text>
-					</Button>
+					</TouchableWithoutFeedback>
+					{ submitButton }
 					<FBLogin
 						permissions={["email", "public_profile"]} 
 						loginBehavior={FBLoginManager.LoginBehaviors.Native}
 						onLogin={(data) => console.log(data)}
 						onLogout={() => console.log("Logged Out")}/>
-				</Content>
+				</KeyboardAvoidingView>
 			</Container>
 		)
 	}
@@ -95,14 +132,22 @@ const styles = StyleSheet.create({
 	}
 })
 
+const mapStateToProps = state => {
+	return {
+		isLoading: state.ui.isLoading
+	}
+}
+
 const mapDispatchToProps = dispatch => {
 	return {
-		onLogin: (authData) => dispatch(tryAuth(authData))
+		onTryAuth: (authData, authMode) => dispatch(tryAuth(authData, authMode))
 	}
 }
 
 export default reduxForm({
 	form: 'auth',
 	validate
-})(AuthScreen);
+})(
+	connect(mapStateToProps, mapDispatchToProps)(AuthScreen)
+);
 
