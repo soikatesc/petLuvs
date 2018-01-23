@@ -1,4 +1,4 @@
-import { DUMMUY_ACTION, TRY_AUTH } from './actionTypes';
+import { AUTH_SET_TOKEN, TRY_AUTH } from './actionTypes';
 import { uiStopLoading, uiStartLoading } from './index';
 import startMainTabs from '../../screens/MainTabs/startMainTabs';
 
@@ -23,7 +23,7 @@ export const tryAuth = (authData, authMode) => {
 			}
 		})
 		.catch(err => {
-			console.log(err);
+			// console.log(err);
 			dispatch(uiStopLoading());
 			alert("Authentication Failed")
 		})
@@ -31,13 +31,21 @@ export const tryAuth = (authData, authMode) => {
 		.then(parsedRes => {
 			dispatch(uiStopLoading());
 			console.log(parsedRes);
-			if (parsedRes.error) {
+			if (!parsedRes.idToken) {
 				alert("Authentication Failed")
 			} else {
+				dispatch(authSetToken(parsedRes.idToken));
 				startMainTabs();
 			}
 		})
 	};
 };
+
+export const authSetToken = token => {
+	return {
+		type: AUTH_SET_TOKEN,
+		token: token
+	}
+}
 
 
