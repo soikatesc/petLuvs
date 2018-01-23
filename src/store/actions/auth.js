@@ -1,7 +1,8 @@
-import { DUMMUY_ACTION } from './actionTypes';
+import { DUMMUY_ACTION, TRY_AUTH } from './actionTypes';
 
-export const auth = () => {
+export const tryAuth = (authData) => {
 	return {
-		type: DUMMUY_ACTION
-	}
+		type: TRY_AUTH,
+		authData: authData
+	};
 };

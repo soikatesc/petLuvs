@@ -1,9 +1,11 @@
 import { createStore, combineReducers, compose } from 'redux';
 
 import authReducer from './reducers/auth.js';
+import { reducer as formReducer } from 'redux-form';
 
 const rootReducer = combineReducers({
-	auth: authReducer
+	auth: authReducer,
+	form: formReducer
 });
 
 let composeEnhancers = compose;
